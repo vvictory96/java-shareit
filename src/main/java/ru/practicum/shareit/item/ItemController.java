@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.comment.dto.CommentDto;
+import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -26,16 +28,20 @@ import java.util.List;
 public class ItemController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
+    private final CommentService commentService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService,
+                          CommentService commentService) {
         this.itemService = itemService;
+        this.commentService = commentService;
     }
 
     @SneakyThrows
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId) {
+    public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId,
+                                           @RequestHeader(USER_ID_HEADER) long userId) {
         log.info("---START FIND ITEM ENDPOINT---");
-        return new ResponseEntity<>(itemService.getItem(itemId), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.getItem(itemId, userId), HttpStatus.OK);
     }
 
     @PostMapping
@@ -63,5 +69,12 @@ public class ItemController {
     public ResponseEntity<List<ItemDto>> searchItems(@RequestParam String text) {
         log.info("---START SEARCH ITEM ENDPOINT---");
         return new ResponseEntity<>(itemService.searchItem(text), HttpStatus.OK);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(@PathVariable long itemId,
+                                                 @Valid @RequestBody CommentDto comment,
+                                                 @RequestHeader(value = USER_ID_HEADER) Long userId) {
+        return new ResponseEntity<>(commentService.add(itemId, comment, userId), HttpStatus.OK);
     }
 }
