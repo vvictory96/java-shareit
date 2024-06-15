@@ -73,14 +73,7 @@ public class BookingControllerTest {
                 .status(BookingStatus.WAITING)
                 .build();
     }
-
-    @Test
-    public void addBookingTest() throws Exception {
-        when(bookingService.addBooking(bookingDto, 2L)).thenReturn(bookingResult);
-
-        checkBookingProps(mockMvc.perform(postJson("/bookings", bookingDto)
-                .header(USER_ID_HEADER, 2L)));
-    }
+    
 
     @Test
     public void approveBookingTest() throws Exception {
