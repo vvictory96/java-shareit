@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.BookingCondition;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.paging.Paging;
+import ru.practicum.shareit.paging.PagingParam;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -55,15 +57,17 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<List<BookingDto>> getAllByUser(@RequestParam(defaultValue = "ALL") String state,
-                                                         @RequestHeader(value = USER_ID_HEADER) Long userId) {
+                                         @RequestHeader(value = USER_ID_HEADER) Long userId,
+                                         @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND ALL BOOKING ENDPOINT---");
-        return new ResponseEntity<>(bookingService.getAllByUser(userId, BookingCondition.convert(state)), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getAllByUser(userId, BookingCondition.convert(state), paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingDto>> getBookingsByItems(@RequestParam(defaultValue = "ALL") String state,
-                                                               @RequestHeader(value = USER_ID_HEADER) long userId) {
+                                               @RequestHeader(value = USER_ID_HEADER) long userId,
+                                               @PagingParam({0, 10})Paging paging) {
         log.info("---START FIND BOOKING BY ITEM ENDPOINT---");
-        return new ResponseEntity<>(bookingService.getBookingsByItems(userId, BookingCondition.convert(state)), HttpStatus.OK);
+        return new ResponseEntity<>(bookingService.getBookingsByItems(userId, BookingCondition.convert(state), paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
 }

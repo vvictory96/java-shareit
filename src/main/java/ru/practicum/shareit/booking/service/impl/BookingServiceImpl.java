@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -75,23 +77,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllByUser(long userId, BookingCondition status) {
+    public List<BookingDto> getAllByUser(long userId, BookingCondition status, int from, int size) {
         User user = getUserById(userId);
 
-        return repository.findAllByBookerId(user.getId()).stream()
+        return repository.findAllByBookerIdOrderByStartDesc(user.getId(), createPageable(from, size)).stream()
                 .filter(o -> filterByCondition(o, status))
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .map(BookingMapper::bookingToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BookingDto> getBookingsByItems(long userId, BookingCondition status) {
+    public List<BookingDto> getBookingsByItems(long userId, BookingCondition status, int from, int size) {
         User user = getUserById(userId);
 
-        return repository.findAllByItemOwnerId(user.getId()).stream()
+        return repository.findAllByItemOwnerIdOrderByStartDesc(user.getId(), createPageable(from, size)).stream()
                 .filter(o -> filterByCondition(o, status))
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
                 .map(BookingMapper::bookingToDto)
                 .collect(Collectors.toList());
     }
@@ -135,5 +135,10 @@ public class BookingServiceImpl implements BookingService {
     private void checkDate(BookingDto booking) {
         if (booking.getStart().isAfter(booking.getEnd()) || booking.getStart().equals(booking.getEnd()))
             throw new ObjectCreationException("End date cannot be after/equal start date");
+    }
+
+    private Pageable createPageable(int from, int size) {
+        int page = from == 0 ? 0 : from / size;
+        return PageRequest.of(page, size);
     }
 }
