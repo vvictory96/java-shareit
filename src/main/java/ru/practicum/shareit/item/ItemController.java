@@ -63,7 +63,7 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItemsList(@RequestHeader(value = USER_ID_HEADER) Long userId,
-                                                      @PagingParam({0, 10})Paging paging) {
+                                                      @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND ALL ITEMS ENDPOINT---");
         return new ResponseEntity<>(itemService.getItemsList(userId, paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }

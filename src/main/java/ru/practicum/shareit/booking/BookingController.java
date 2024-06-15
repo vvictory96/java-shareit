@@ -57,16 +57,16 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<List<BookingDto>> getAllByUser(@RequestParam(defaultValue = "ALL") String state,
-                                         @RequestHeader(value = USER_ID_HEADER) Long userId,
-                                         @PagingParam({0, 10}) Paging paging) {
+                                                         @RequestHeader(value = USER_ID_HEADER) Long userId,
+                                                         @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND ALL BOOKING ENDPOINT---");
         return new ResponseEntity<>(bookingService.getAllByUser(userId, BookingCondition.convert(state), paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingDto>> getBookingsByItems(@RequestParam(defaultValue = "ALL") String state,
-                                               @RequestHeader(value = USER_ID_HEADER) long userId,
-                                               @PagingParam({0, 10})Paging paging) {
+                                                               @RequestHeader(value = USER_ID_HEADER) long userId,
+                                                               @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND BOOKING BY ITEM ENDPOINT---");
         return new ResponseEntity<>(bookingService.getBookingsByItems(userId, BookingCondition.convert(state), paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
