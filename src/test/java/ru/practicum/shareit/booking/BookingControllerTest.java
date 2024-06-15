@@ -72,7 +72,7 @@ public class BookingControllerTest {
                 .status(BookingStatus.WAITING)
                 .build();
     }
-    
+
 
     @Test
     public void approveBookingTest() throws Exception {
