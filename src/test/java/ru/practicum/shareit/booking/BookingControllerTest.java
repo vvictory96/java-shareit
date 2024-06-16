@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,12 +15,16 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.BookingCondition;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.exception.ArgumentException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -75,7 +80,8 @@ public class BookingControllerTest {
 
 
     @Test
-    public void approveBookingTest() throws Exception {
+    @SneakyThrows
+    public void approveBookingTest() {
         BookingDto bookingResultApproved = bookingResult;
         bookingResultApproved.setStatus(BookingStatus.APPROVED);
 
@@ -87,7 +93,8 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void getBookingByIdTest() throws Exception {
+    @SneakyThrows
+    public void getBookingByIdTest() {
         when(bookingService.getBooking(1L, 1L)).thenReturn(bookingResult);
 
         checkBookingProps(mockMvc.perform(get("/bookings/1")
@@ -95,7 +102,8 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void getAllByUser() throws Exception {
+    @SneakyThrows
+    public void getAllByUser() {
         when(bookingService.getAllByUser(1L, BookingCondition.ALL, 0, 10))
                 .thenReturn(List.of(bookingResult));
 
@@ -104,12 +112,21 @@ public class BookingControllerTest {
     }
 
     @Test
-    public void getBookingsByItemsTest() throws Exception {
+    @SneakyThrows
+    public void getBookingsByItemsTest() {
         when(bookingService.getBookingsByItems(1L, BookingCondition.ALL, 0, 10))
                 .thenReturn(List.of(bookingResult));
 
         checkBookingListProps(mockMvc.perform(get("/bookings/owner")
                 .header(USER_ID_HEADER, 1L)));
+    }
+
+    @Test
+    public void checkValid() {
+        ArgumentException exception = assertThrows(ArgumentException.class, () ->
+                bookingService.getAllByUser(1L, BookingCondition.convert("STATE"), 0, 10));
+
+        assertThat(exception.getMessage(), is("Unknown state: STATE"));
     }
 
     private static void checkBookingProps(ResultActions result) throws Exception {
