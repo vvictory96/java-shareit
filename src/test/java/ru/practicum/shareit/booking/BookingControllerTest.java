@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.RequestWithJson.postJson;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +79,13 @@ public class BookingControllerTest {
                 .build();
     }
 
+    @Test
+    public void addBookingTest() throws Exception {
+        when(bookingService.addBooking(bookingDto, 2L)).thenReturn(bookingResult);
+
+        checkBookingProps(mockMvc.perform(postJson("/bookings", bookingDto)
+                .header(USER_ID_HEADER, 2L)));
+    }
 
     @Test
     @SneakyThrows

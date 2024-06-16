@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,11 +13,13 @@ import ru.practicum.shareit.booking.model.ItemBooking;
 import ru.practicum.shareit.booking.service.ItemBookingService;
 import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.service.CommentService;
+import ru.practicum.shareit.exception.ObjectAccessException;
 import ru.practicum.shareit.exception.ObjectUpdateException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -26,10 +29,12 @@ import java.util.Optional;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceUnitTest {
 
@@ -111,6 +116,52 @@ public class ItemServiceUnitTest {
                 itemService.updateItem(1L, updatedItem, 1L));
 
         assertThat(exception.getMessage(), is("These fields can't be updated"));
+    }
+
+    @Test
+    public void updateItem() {
+        User user2 = new User(2L, "user2 name", "user2@mail.com");
+
+        ItemDto updatedItem = item1Dto;
+        updatedItem.setOwner(null);
+        updatedItem.setRequestId(null);
+        updatedItem.setName("New name");
+        updatedItem.setDescription("New Description");
+        updatedItem.setAvailable(true);
+
+        Item item = new Item();
+        item.setId(1L);
+        item.setOwner(user2);
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        Item newItem = new Item(1L, "item1 name",
+                "item1 description",
+                true,
+                user2,
+                new ItemRequest(),
+                itemBooking1,
+                itemBooking2,
+                item1.getComments());
+
+        when(itemRepository.save(any())).thenReturn(newItem);
+        itemService.updateItem(1L, updatedItem, 2L);
+    }
+
+    @Test
+    public void updateItem_NotYourItem() {
+        ItemDto updatedItem = item1Dto;
+
+        Item item = new Item();
+        item.setId(1L);
+        item.setOwner(new User());
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        ObjectAccessException exception = assertThrows(ObjectAccessException.class, () ->
+                itemService.updateItem(1L, updatedItem, 2L));
+
+        assertThat(exception.getMessage(), is("You can edit only your items"));
     }
 
     @Test
