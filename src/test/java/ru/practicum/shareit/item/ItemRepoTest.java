@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -26,7 +25,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class ItemRepoTest {
 
     private static final Pageable PAGEABLE = PageRequest.of(0, 10);
-    private static final LocalDateTime CURRENT_TIME = LocalDateTime.now();
 
     @Autowired
     private TestEntityManager entityManager;
