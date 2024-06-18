@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +32,13 @@ public class UserController {
     }
 
 
-    @SneakyThrows
     @PostMapping
     public ResponseEntity<UserDto> addUser(@Valid @RequestBody UserDto user) {
         log.info("---START ADD USER ENDPOINT---");
         return new ResponseEntity<>(userService.addUser(user), HttpStatus.OK);
     }
 
-    @SneakyThrows
+
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long userId) {
         log.info("---START FIND USER ENDPOINT---");
@@ -48,14 +46,14 @@ public class UserController {
         return new ResponseEntity<>(userService.getUser(userId), HttpStatus.OK);
     }
 
-    @SneakyThrows
+
     @PatchMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @RequestBody UserDto user) {
         log.info("---START UPDATE USER ENDPOINT---");
         return new ResponseEntity<>(userService.updateUser(userId, user), HttpStatus.OK);
     }
 
-    @SneakyThrows
+
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
         log.info("---START DELETE USER ENDPOINT---");

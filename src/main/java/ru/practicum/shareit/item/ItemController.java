@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +16,8 @@ import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.paging.Paging;
+import ru.practicum.shareit.paging.PagingParam;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ItemController {
         this.commentService = commentService;
     }
 
-    @SneakyThrows
+
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemDto> getItem(@PathVariable Long itemId,
                                            @RequestHeader(USER_ID_HEADER) long userId) {
@@ -60,15 +61,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getItemsList(@RequestHeader(value = USER_ID_HEADER) Long userId) {
+    public ResponseEntity<List<ItemDto>> getItemsList(@RequestHeader(value = USER_ID_HEADER) Long userId,
+                                                      @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND ALL ITEMS ENDPOINT---");
-        return new ResponseEntity<>(itemService.getItemsList(userId), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.getItemsList(userId, paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItems(@RequestParam String text) {
+    public ResponseEntity<List<ItemDto>> searchItems(@RequestParam String text,
+                                                     @PagingParam({0, 10}) Paging paging) {
         log.info("---START SEARCH ITEM ENDPOINT---");
-        return new ResponseEntity<>(itemService.searchItem(text), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.searchItem(text, paging.getFrom(), paging.getSize()), HttpStatus.OK);
     }
 
     @PostMapping("/{itemId}/comment")
