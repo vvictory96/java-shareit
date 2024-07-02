@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -14,30 +14,26 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.model.BookingCondition;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.paging.Paging;
 import ru.practicum.shareit.paging.PagingParam;
 
-import javax.validation.Valid;
 
-@Slf4j
 @Controller
 @RequestMapping(path = "/bookings")
+@RequiredArgsConstructor
+@Slf4j
 @Validated
 public class BookingController {
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
     private final BookingClient bookingClient;
 
-    public BookingController(BookingClient bookingClient) {
-        this.bookingClient = bookingClient;
-    }
-
     @PostMapping
-    public ResponseEntity<Object> addBooking(@RequestBody @Valid BookingDto booking,
+    public ResponseEntity<Object> addBooking(@RequestBody @Validated BookingDto booking,
                                              @RequestHeader(value = USER_ID_HEADER) long userId) {
         log.info("---START CREATE BOOKING ENDPOINT---");
         log.info("Creating booking {}, userId={}", booking, userId);
-        return new ResponseEntity<>(bookingClient.addBooking(booking, userId), HttpStatus.OK);
+        return bookingClient.addBooking(booking, userId);
     }
 
     @PatchMapping("/{bookingId}")
@@ -45,31 +41,30 @@ public class BookingController {
                                                  @RequestParam boolean approved,
                                                  @RequestHeader(value = USER_ID_HEADER) long userId) {
         log.info("---START UPDATE BOOKING ENDPOINT---");
-        return new ResponseEntity<>(bookingClient.approveBooking(bookingId, approved, userId), HttpStatus.OK);
+        return bookingClient.approveBooking(bookingId, approved, userId);
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getBookingById(@PathVariable long bookingId,
-                                                 @RequestHeader(value = USER_ID_HEADER) long userId) {
+    public ResponseEntity<Object> getBooking(@RequestHeader(USER_ID_HEADER) long userId,
+                                             @PathVariable Long bookingId) {
         log.info("---START FIND BOOKING ENDPOINT---");
         log.info("Get booking {}, userId={}", bookingId, userId);
-        return new ResponseEntity<>(bookingClient.getBooking(bookingId, userId), HttpStatus.OK);
+        return bookingClient.getBookingById(userId, bookingId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllByUser(@RequestParam(defaultValue = "ALL") String state,
-                                               @RequestHeader(value = USER_ID_HEADER) Long userId,
-                                               @PagingParam({0, 10}) Paging paging) {
+    public ResponseEntity<Object> getBookingsByUser(@RequestHeader(USER_ID_HEADER) long userId,
+                                                    @RequestParam(defaultValue = "ALL") BookingState state,
+                                                    @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND ALL BOOKING ENDPOINT---");
-        return new ResponseEntity<>(bookingClient.getAllBookingsByUser(userId, BookingCondition.convert(state), paging.getFrom(), paging.getSize()), HttpStatus.OK);
+        return bookingClient.getBookingsByUser(userId, state, paging.getFrom(), paging.getSize());
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> getBookingsByItems(@RequestParam(defaultValue = "ALL") String state,
-                                                     @RequestHeader(value = USER_ID_HEADER) long userId,
-                                                     @PagingParam({0, 10}) Paging paging) {
+    public ResponseEntity<Object> getBookingByItems(@RequestParam(defaultValue = "ALL") BookingState state,
+                                                    @RequestHeader(value = USER_ID_HEADER) long userId,
+                                                    @PagingParam({0, 10}) Paging paging) {
         log.info("---START FIND BOOKING BY ITEM ENDPOINT---");
-        return new ResponseEntity<>(bookingClient.getAllBookingsByItems(BookingCondition.convert(state), userId, paging.getFrom(), paging.getSize()), HttpStatus.OK);
+        return bookingClient.getBookingByItems(state, userId, paging.getSize(), paging.getFrom());
     }
-
 }

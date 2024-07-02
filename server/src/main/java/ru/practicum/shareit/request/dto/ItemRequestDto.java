@@ -1,5 +1,6 @@
 package ru.practicum.shareit.request.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,12 +17,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemRequestDto {
 
-    private long id;
+   private long id;
 
     @NotBlank
     private String description;
 
-    private Date created;
+   private Date created;
 
-    private List<ItemDtoRequest> items;
+   private List<ItemDtoRequest> items;
 }

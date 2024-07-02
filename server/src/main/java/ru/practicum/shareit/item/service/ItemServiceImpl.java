@@ -1,32 +1,29 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.service.ItemBookingService;
-import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.exception.ObjectAccessException;
 import ru.practicum.shareit.exception.ObjectExistenceException;
 import ru.practicum.shareit.exception.ObjectUpdateException;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.comment.service.CommentService;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.lang.String.format;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -35,7 +32,6 @@ public class ItemServiceImpl implements ItemService {
     private final CommentService commentService;
     private final ItemRepository repository;
     private final ItemRequestRepository requestRepository;
-
 
     @Override
     @Transactional
@@ -48,7 +44,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItem(Long id, long userId) {
-        log.info(format("Get item by id: %s and user: %s ", id, userId));
         ItemDto item = ItemMapper.toItemDto(getItemById(id));
         item.setLastBooking(item.getOwner().getId() == userId ? bookingService.getLastBooking(item.getId()) : null);
         item.setNextBooking(item.getOwner().getId() == userId ? bookingService.getNextBooking(item.getId()) : null);
@@ -65,28 +60,27 @@ public class ItemServiceImpl implements ItemService {
                     o.setComments(commentService.getAllCommentsByItemId(o.getId()));
                     return ItemMapper.toItemDto(o);
                 })
+                .sorted(Comparator.comparingLong(ItemDto::getId))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public ItemDto updateItem(Long id, ItemDto item, Long idUser) {
-        log.info(format("Start update item = [%s]", id));
+    public ItemDto updateItem(Long id, ItemDto item, Long userId) {
         Item itemToUpdate = getItemById(id);
-        checkItemOnUpdate(itemToUpdate, item, idUser);
+
+        checkItemOnUpdate(itemToUpdate, item, userId);
 
         itemToUpdate.setName(item.getName() == null ? itemToUpdate.getName() : item.getName());
         itemToUpdate.setDescription(item.getDescription() == null ? itemToUpdate.getDescription() : item.getDescription());
         itemToUpdate.setAvailable(item.getAvailable() == null ? itemToUpdate.isAvailable() : item.getAvailable());
 
         repository.save(itemToUpdate);
-        log.info("Item after update: {}", ItemMapper.toItemDto(itemToUpdate));
         return ItemMapper.toItemDto(itemToUpdate);
     }
 
     @Override
     public List<ItemDto> searchItem(String text, int from, int size) {
-        log.info("Поиск: {}, откуда: {}, размер: {}", text, from, size);
         if (text.isBlank())
             return new ArrayList<>();
 

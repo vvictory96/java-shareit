@@ -27,7 +27,7 @@ public class RequestClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getUserRequests(Paging paging, long userId) {
+    public ResponseEntity<Object> getAllUserRequests(Paging paging, long userId) {
         Map<String, Object> parameters = Map.of(
                 "from", paging.getFrom(),
                 "size", paging.getSize()

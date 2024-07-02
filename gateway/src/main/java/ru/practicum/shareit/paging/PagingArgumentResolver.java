@@ -1,5 +1,6 @@
 package ru.practicum.shareit.paging;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -9,6 +10,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import javax.validation.ValidationException;
 import java.util.Objects;
 
+import static java.lang.String.format;
+
+@Slf4j
 public class PagingArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -45,8 +49,9 @@ public class PagingArgumentResolver implements HandlerMethodArgumentResolver {
     }
 
     private void validatePaging(Paging paging) {
+        log.info("VALID from {}, size {}", paging.getFrom(),paging.getSize());
         if (paging.getFrom() < 0 || paging.getSize() <= 0) {
-            throw new ValidationException();
+            throw new ValidationException(format("ОШИБКА!!! from [%s] и size [%s]", paging.getFrom(), paging.getSize()));
         }
     }
 }

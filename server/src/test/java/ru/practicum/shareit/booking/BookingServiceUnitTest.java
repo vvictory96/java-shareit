@@ -89,7 +89,7 @@ public class BookingServiceUnitTest {
         ObjectCreationException exception = assertThrows(ObjectCreationException.class, () ->
                 bookingService.addBooking(BookingMapper.bookingToDto(booking), 1L));
 
-        assertThat(exception.getMessage(), is("End date cannot be after/equal start date"));
+        assertThat(exception.getMessage(), is("End date cannot be before/equal start date"));
     }
 
     @Test

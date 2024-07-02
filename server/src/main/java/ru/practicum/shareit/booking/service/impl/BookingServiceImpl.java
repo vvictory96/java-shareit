@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -20,7 +21,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,7 +97,6 @@ public class BookingServiceImpl implements BookingService {
 
     private boolean filterByCondition(Booking booking, BookingCondition cond) {
         final LocalDateTime currentTime = LocalDateTime.now();
-
         switch (cond) {
             case REJECTED:
                 return booking.getStatus().equals(BookingStatus.REJECTED);
@@ -133,7 +132,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void checkDate(BookingDto booking) {
         if (booking.getStart().isAfter(booking.getEnd()) || booking.getStart().equals(booking.getEnd()))
-            throw new ObjectCreationException("End date cannot be after/equal start date");
+            throw new ObjectCreationException("End date cannot be before/equal start date");
     }
 
     private Pageable createPageable(int from, int size) {
