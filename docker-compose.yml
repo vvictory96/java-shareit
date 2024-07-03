@@ -19,18 +19,25 @@ services:
       - db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
-      - DB_NAME=Shareit-db
+      #- DB_NAME=Shareit-db
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-      - DB_HOST=db
-      - DB_PORT=5432
+      #- DB_HOST=db
+      #- DB_PORT=5432
 
   db:
     image: postgres:15.3-alpine
     container_name: shareit-postgres-db
+    volumes:
+      - /var/lib/postgresql/data/
     ports:
       - "6541:5432"
     environment:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
