@@ -13,7 +13,6 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,16 +21,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BookingDto {
     private long id;
-    @NotNull
     private long itemId;
     private Item item;
-    @NotNull
-    @FutureOrPresent
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime start;
-    @NotNull
-    @Future
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime end;
